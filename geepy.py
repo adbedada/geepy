@@ -1,5 +1,4 @@
 import ee
-from ee import batch
 import shapefile
 
 
@@ -151,4 +150,33 @@ def get_sentinel(product, aoi, start_date, end_date,
         task = ee.batch.Export.image.toDrive(mosaic, region=region, description=output)
         task.start()
 
+##### needs work #####
 
+def get_modis(product, aoi, start_date, end_date,
+              band='NDVI', output='output', export=False):
+
+    geometry = read_feature_collection(aoi)
+    col = ee.ImageCollection(product) \
+        .filterBounds(geometry) \
+        .filterDate(start_date, end_date) \
+        .select(band)
+
+    if export is False:
+        return col
+
+    else:
+        list = col.toList(col.size())
+        for i in range(list):
+            +=i
+            image = ee.Image(list.get(i))
+
+            mosaic = image.mosaic()
+
+        # region to bound the export view to
+            region = ee.Feature(geometry.first()) \
+                .geometry().bounds() \
+                .getInfo()['coordinates']
+
+        # start exporting as a single tile/image
+            task = ee.batch.Export.image.toDrive(mosaic, region=region, description=output)
+            task.start()
