@@ -1,6 +1,7 @@
 import ee
 from ee import batch
-import fiona
+import shapefile
+
 
 def read_meta_data(product):
     ee.Initialize()
@@ -8,15 +9,27 @@ def read_meta_data(product):
     return img.getInfo()
 
 
-def read_feature(shapefile):
-    with fiona.open(shapefile) as src:
-        feature_col= (src['geometry'])
-        return feature_col
+def read_feature_collection(shp):
+    '''convert shapefile to feature collection'''
+
+    reader = shapefile.Reader(shp)
+    fields = reader.fields[1:]
+    field_names = [field[0] for field in fields]
+
+    features = []
+    for sr in reader.shapeRecords():
+        atr = dict(zip(field_names, sr.record))
+        geom = sr.shape.__geo_interface__
+        ee_geometry = ee.Geometry(geom)
+        feat = ee.Feature(ee_geometry, atr)
+        features.append(feat)
+
+    return ee.FeatureCollection(features)
 
 
 def read_single_image(product, aoi,start_date, end_date):
     bands=['B2', 'B3', 'B4']
-    geometry = read_feature(aoi)
+    geometry = read_feature_collection(aoi)
     img = ee.ImageCollection(product)\
         .filterBounds(geometry)\
         .filterDate(start_date, end_date) \
@@ -32,32 +45,26 @@ def convertBit(self):
 
 def get_landsat(product, aoi,start_date, end_date,
                 percent_of_cloud_cover=5,
+                name_of_output_file='output',
                 bands=['B2','B3','B4'],
                 export=False):
-    geometry = read_feature(aoi)
-    col = ee.ImageCollection(product)\
+    geometry = read_feature_collection(aoi)
+    img = ee.ImageCollection(product)\
         .filterBounds(geometry)\
         .filterDate(start_date, end_date) \
-        .select(bands)
-    img = col.filter(ee.Filter.lt('ClOUD_COVER',percent_of_cloud_cover))
+
+    col = img.filter(ee.Filter.lt('ClOUD_COVER',percent_of_cloud_cover))
 
     if export is False:
-        return img
+        return col
     else:
-        #mosaic_tiff =img.mosaic()
+        mosaic = ee.ImageCollection([
+                     col.select(bands).clip(geometry),
+                     ]).mosaic()
 
-        task_config = {
-            'description': 'imageToDriveExample',
-            'scale': 30,
-             'crs': "EPSG:4326",
-        }
-        task = batch.Export.image.toDrive(img,
-                                          '_exported_image',
-                                          task_config)
-
-
+        task = ee.batch.Export.image(mosaic, description = name_of_output_file)
         task.start()
-        print("Completed exporting Tiff To Google Drive :-)")
+
 
 
 def sentinel_cloud_mask(image):
@@ -70,34 +77,28 @@ def sentinel_cloud_mask(image):
                 .copyProperties(image, ["system:time_start"])
 
 
-def get_sentinel(product, aoi,start_date, end_date,
+def get_sentinel(product, aoi, start_date, end_date,
                 percent_of_cloud_cover=3,
+                name_of_output_file='output',
                 bands=['B2','B3','B4','B8'],
                 export=False):
-    geometry = read_feature(aoi)
-    col = ee.ImageCollection(product) \
+    geometry = read_feature_collection(aoi)
+    img = ee.ImageCollection(product) \
         .filterBounds(geometry) \
         .filterDate(start_date, end_date) \
         .map(sentinel_cloud_mask) \
-        .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', percent_of_cloud_cover))
 
-    mosaic = ee.ImageCollection([col.select(bands)]).mosaic()
+    col = img.filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', percent_of_cloud_cover))
 
     if export is False:
-        return mosaic
+        return col
     else:
-        #mosaic_tiff =img.mosaic()
+        mosaic = ee.ImageCollection([
+            col.select(bands).clip(geometry),
+        ]).mosaic()
 
-        task_config = {
-            'description': 'imageToDriveExample',
-            'scale': 30,
-             'crs': "EPSG:4326",
-        }
-        task = batch.Export.image.toDrive(mosaic,
-                                          '00_exported_image',
-                                          task_config)
-
-
+        task = ee.batch.Export.image(mosaic, description=name_of_output_file)
 
         task.start()
-        print("Completed exporting Tiff To Google Drive :-)")
+        print("Completed exporting Tiff To Google Drive. ")
+
