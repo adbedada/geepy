@@ -166,8 +166,8 @@ def get_modis(product, aoi, start_date, end_date,
 
     else:
         list = col.toList(col.size())
-        for i in range(list):
-            +=i
+        for i in len(list):
+            #needs work
             image = ee.Image(list.get(i))
 
             mosaic = image.mosaic()

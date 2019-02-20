@@ -1,14 +1,16 @@
 
 import ee
 import geepy
+
+
 ee.Initialize()
 
-#print meta_data
-sample = geepy.get_landsat('LANDSAT/LC8_L1T_TOA',
-                           '../data/tza_dar_es_salaam.shp',
-                           "2013-01-01", "2018-01-01",
-                           bands=['B4','B3','B2'],
-                    export=False)
 
-print(sample.getInfo())
+#print meta_data
+geepy.get_landsat('LANDSAT/LC08/C01/T1_SR',
+                           '../data/aa_sample_data.shp',
+                           "2017-01-01", "2018-01-01",
+                  output="aa_test",
+                  bands=['B2', 'B3', 'B4'],
+                  export=True)
 
