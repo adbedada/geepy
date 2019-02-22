@@ -1,7 +1,6 @@
 
 import ee
-import geepy
-
+from geepy import geepy
 
 ee.Initialize()
 
