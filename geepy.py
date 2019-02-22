@@ -1,23 +1,33 @@
 import ee
 import shapefile
-import click
+import fiona
+
 ee.Initialize()
 
 
-# @click.command()
-# @click.argument('product')
 def check_metadata(product):
     '''
     check an image product's meta data
     :param product: Name of a single Image or Tile
     :return: meta data
     '''
-    img = ee.Image(product)
-    print(img.getInfo())
-#
-#
-# @click.command()
-# @click.argument('shp')
+    try:
+        img = ee.Image(product)
+        print(img.getInfo())
+
+    except:
+        img = ee.ImageCollection(product)
+        print(img.getInfo())
+
+
+def get_epsg(shp):
+    with fiona.open(shp) as src:
+        epsg = src.crs['init']
+        pos = 5
+        epsg_num = epsg[pos:]
+    return epsg_num
+
+
 def get_features(shp):
     '''
     converts shapefile to ee's feature collection
@@ -28,12 +38,14 @@ def get_features(shp):
     reader = shapefile.Reader(shp)
     fields = reader.fields[1:]
     field_names = [field[0] for field in fields]
-
+    projection = get_epsg(shp)
+    wgs84 = ee.Projection('EPSG:4326')
     features = []
     for sr in reader.shapeRecords():
         atr = dict(zip(field_names, sr.record))
         geom = sr.shape.__geo_interface__
-        ee_geometry = ee.Geometry(geom)
+        ee_geometry = ee.Geometry(geom, 'EPSG:' + projection) \
+                        .transform(wgs84, 1)
         feat = ee.Feature(ee_geometry, atr)
         features.append(feat)
 
@@ -158,9 +170,9 @@ def get_sentinel(product, aoi, start_date, end_date,
         task.start()
 
 
-##### needs work #####
+
 def get_modis(product, aoi, start_date, end_date,
-              band='NDVI', output='output', export=False):
+              band='NDVI', export=False):
 
     geometry = get_features(aoi)
     col = ee.ImageCollection(product) \
@@ -172,29 +184,19 @@ def get_modis(product, aoi, start_date, end_date,
         return col
 
     else:
-        list = col.toList(col.size())
-        for i in len(list):
-            #needs work
-            image = ee.Image(list.get(i))
 
-            mosaic = image.mosaic()
+        length = len(col.getInfo()['features'])
+        img_list = col.toList(length)
 
-        # region to bound the export view to
-            region = ee.Feature(geometry.first()) \
-                .geometry().bounds() \
-                .getInfo()['coordinates']
+        region = ee.Feature(geometry.first())\
+                    .geometry().bounds().getInfo()['coordinates']
 
-        # start exporting as a single tile/image
-            task = ee.batch.Export.image.toDrive(mosaic,
+        for i in range(length):
+            img = ee.Image(img_list.get(i)).clip(geometry)
+            name = (img.getInfo()['properties']['system:index'])
+            task = ee.batch.Export.image.toDrive(img,
                                                  region=region,
-                                                 description=output)
+                                                 description=name)
+
             task.start()
-#
-#
-# @click.group(chain=True)
-# def commands():
-#     pass
-#
-#
-# commands.add_command(features)
-# commands.add_command(check_metadata)
+        print("submitted task for downloading your request")
