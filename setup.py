@@ -2,17 +2,14 @@ from setuptools import find_packages, setup
 
 REQUIRED = [
     'click>=7.0',
-    'fiona>=1.8.4',
-    'shapely>=1.6.4',
-    'rasterio>=1.0.18'
 ]
 setup(
     name='geepy',
     version=0.1,
     entry_points='''
         [console_scripts]
-        geepy=geepy.cli:commands
+        geepy=gcli:commands
         ''',
-    packages=find_packages(),
+    py_modules=['geepy','gcli'],
     install_requires=REQUIRED
 )
