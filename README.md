@@ -1,16 +1,14 @@
 ## geepy
    
-   Geepy is built up on Google Earth Engine's python api with a goal in mind of 
-   simplifying access to imagery for an area of interest. This is done by allowing
-    users to leverage ESRI's shapefile for cropping an image. 
-    
-   Geepy also lets users download certain products for a time-series analysis. 
-    Images can be extracted resolution by the temporal resolution of the product
-     (e.g, 16-day, pentad, 1-day...). 
+Geepy is built up on Google Earth Engine's python api with a goal in mind of 
+simplifying access to imagery for an area of interest. This is done by allowing
+users to leverage ESRI's shapefile for cropping an image. 
+
+Geepy also lets users download certain products for a time-series analysis. 
+Images can be extracted resolution by the temporal resolution of the product
+ (e.g, 16-day, pentad, 1-day...). 
      
-
  ##### Installation
-
 
 from github:
 
@@ -18,48 +16,47 @@ from github:
     cd geepy
     pip install e .
 
-##### Usage:
+##### Usage
 
-   Get CHIRPS (rainfall) data with the option to export for downloading.
+Get CHIRPS (rainfall) data with the option to export for downloading.
 
-    ```python
-        import geepy 
+```python
+import geepy
         
-        task = geepy.get_chirps("UCSB-CHG/CHIRPS/PENTAD", 
-                                "../data/sample.shp", 
-                                "2017-11-01", "2018-01-05", 
-                                 export=False)
-     ```
+task = geepy.get_chirps("UCSB-CHG/CHIRPS/PENTAD", 
+                        "../data/sample.shp", 
+                        "2017-11-01", "2018-01-05", 
+                         export=False)
+
+```
      
-   The above script returns an image collection and if we want, for instance, 
-   count number of images/bands collected with in this time period, we can do:
-     
-    ```python
-         num = len(col.getInfo()['features'])
-         print(num)
-    ```
+The above script returns an image collection and if we want, for instance, 
+count number of images/bands collected with in this time period, we can do:
+ 
+```python
+num = len(task.getInfo()['features'])
+print(num)
+```
     
     >>> 13
    
    Alternatively, we can download the product by saving the bands individually.
    This can be done with the `export=True` option and starting the downloading task. 
    
-    ```python
-        task = geepy.get_chirps("UCSB-CHG/CHIRPS/PENTAD", 
-                               "../data/sample.shp", 
-                               "2017-11-01", "2018-01-05", 
-                               export=True)
-       
-       task.start()
-    ```
+```python
+task = geepy.get_chirps("UCSB-CHG/CHIRPS/PENTAD", 
+                           "../data/sample.shp", 
+                           "2017-11-01", "2018-01-05", 
+                           export=True)
+
+task.start()
+```
+
+If job is successfully submitted, the task    will show up
+on the GEE's web-based IDE under the tab 'Task Manager'.
+
    
-       
-   If job is successfully submitted, the task    will show up
-   on the GEE's web-based IDE under the tab 'Task Manager'.
-   
-   
-  <img src="/adbeda/geepy/raw/master/data/task_submitted.png" style="max-width:75%; margin-left:100px">
-    
+  ![png](data/task_submitted.png "max-width=75%") 
     
  ##### From Terminal
  
