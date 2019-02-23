@@ -1,12 +1,11 @@
 ## geepy
    
 Geepy is built up on Google Earth Engine's python api with a goal in mind of 
-simplifying access to imagery for an area of interest. This is done by allowing
-users to leverage ESRI's shapefile for cropping an image. 
+simplifying the process to access imagery for a particular area of our interest. 
+The tool allows users to leverage ESRI's shapefile to crop and interact with a product.
 
-Geepy also lets users download certain products for a time-series analysis. 
-Images can be extracted resolution by the temporal resolution of the product
- (e.g, 16-day, pentad, 1-day...). 
+Geepy also lets users download certain products for a time-series analysis by subsetting 
+and cropping images with respect to their temporal resolution (e.g, 16-day, pentad, 1-day...). 
      
  ##### Installation
 
@@ -56,7 +55,7 @@ If job is successfully submitted, the task    will show up
 on the GEE's web-based IDE under the tab 'Task Manager'.
 
    
-  ![png](data/task_submitted.png "max-width=75%") 
+  ![png](data/task_submitted.png "style:max-width=75%") 
     
  ##### From Terminal
  
@@ -81,7 +80,7 @@ on the GEE's web-based IDE under the tab 'Task Manager'.
  
   To replicate the above example, we can request batch download on terminal with:
   
-    geepy download-chirps UCSB-CHG/CHIRPS/PENTAD data/sample.shp '2017-11-01' '2018-01-05
+    geepy download-chirps'UCSB-CHG/CHIRPS/PENTAD' 'data/sample.shp' '2017-11-01' '2018-01-05'
     
   output on console: 
   

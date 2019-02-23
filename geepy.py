@@ -168,7 +168,7 @@ def get_sentinel(product, aoi,
         task = ee.batch.Export.image.toDrive(mosaic,
                                              region=region,
                                              description=output)
-        return task
+        task.start()
 
 
 def save_output(col, geometry, band):
@@ -214,12 +214,14 @@ def get_modis(product, aoi, start_date, end_date,
             img = ee.Image(img_list.get(i)).clip(geometry)
             timestamp = (img.getInfo()['properties']['system:index'])
             name = (str(band[0] + "_") + timestamp)
+
             task = ee.batch.Export.image.toDrive(img,
                                                  region=region,
                                                  description=name)
 
+            print("submitted "+name+" for downloading")
+
             task.start()
-        print("submitted task for downloading your request")
 
 
 def get_chirps(product, aoi, start_date,
@@ -262,4 +264,39 @@ def get_chirps(product, aoi, start_date,
 
             print("submitted "+name+" for downloading")
 
-            return task
+            task.start()
+
+
+def get_terraclimate(product, aoi, start_date, end_date,
+              band=['aet'], export=False):
+
+    geometry = get_features(aoi)
+    col = ee.ImageCollection(product) \
+        .filterBounds(geometry) \
+        .filterDate(start_date, end_date) \
+        .select(band)
+
+    if export is False:
+        return col
+
+    else:
+
+        length = len(col.getInfo()['features'])
+        img_list = col.toList(length)
+
+        region = ee.Feature(geometry.first())\
+                    .geometry().bounds().getInfo()['coordinates']
+
+        for i in range(length):
+            img = ee.Image(img_list.get(i)).clip(geometry)
+            timestamp = (img.getInfo()['properties']['system:index'])
+
+            name = (str(band) + "_" + timestamp)
+
+            task = ee.batch.Export.image.toDrive(img,
+                                                region=region,
+                                                description=name)
+
+            print("submitted "+name+" for downloading")
+
+            task.start()
