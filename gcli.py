@@ -82,7 +82,8 @@ def download_modis(product, aoi, start_date, end_date,
 
         for i in range(length):
             img = ee.Image(img_list.get(i)).clip(geometry)
-            name = (img.getInfo()['properties']['system:index'])
+            timestamp = (img.getInfo()['properties']['system:index'])
+            name = (str(band[0] + "_") + timestamp)
             task = ee.batch.Export.image.toDrive(img,
                                                  region=region,
                                                  description=name)

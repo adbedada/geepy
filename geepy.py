@@ -5,7 +5,7 @@ import fiona
 ee.Initialize()
 
 
-def check_metadata(product):
+def get_metadata(product):
     '''
     check an image product's meta data
     :param product: Name of a single Image or Tile
@@ -14,7 +14,6 @@ def check_metadata(product):
     try:
         img = ee.Image(product)
         print(img.getInfo())
-
     except:
         img = ee.ImageCollection(product)
         print(img.getInfo())
@@ -170,7 +169,6 @@ def get_sentinel(product, aoi, start_date, end_date,
         task.start()
 
 
-
 def get_modis(product, aoi, start_date, end_date,
               band='NDVI', export=False):
 
@@ -193,7 +191,8 @@ def get_modis(product, aoi, start_date, end_date,
 
         for i in range(length):
             img = ee.Image(img_list.get(i)).clip(geometry)
-            name = (img.getInfo()['properties']['system:index'])
+            timestamp = (img.getInfo()['properties']['system:index'])
+            name = (str(band[0] + "_") + timestamp)
             task = ee.batch.Export.image.toDrive(img,
                                                  region=region,
                                                  description=name)
