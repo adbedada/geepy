@@ -6,10 +6,17 @@ import geepy
 @click.command()
 @click.argument('product')
 def check_metadata(product):
-    ''' - check metadata of an image or image collection'''
-    ee.Initialize()
-    img = ee.Image(product)
-    print(img.getInfo())
+    '''
+    check an image product's meta data
+    :param product: Name of a single Image or Tile
+    :return: meta data
+    '''
+    try:
+        img = ee.Image(product)
+        print(img.getInfo())
+    except:
+        img = ee.ImageCollection(product)
+        print(img.getInfo())
 
 
 @click.command()
@@ -93,4 +100,49 @@ commands.add_command(check_features)
 commands.add_command(check_metadata)
 commands.add_command(download_modis)
 
+#
+# import click
+# import geepy as gp
+#
+#
+# @click.command()
+# @click.argument('product')
+# def check_metadata(product):
+#     '''
+#     - check the metadata of an  image or image collection
+#     '''
+#     gp.get_features(product)
+#
+#
+# @click.command()
+# @click.argument('shp')
+# def check_features(shp):
+#     '''
+#     - check shapefile's compatibility to ee's  collection
+#     '''
+#     features = gp.get_features(shp)
+#     print(features)
+#
+#
+# @click.command()
+# @click.argument('product')
+# @click.argument('aoi')
+# @click.argument('start_date')
+# @click.argument('end_date')
+# @click.argument('band')
+# def download_modis(product, aoi, start_date,end_date, band):
+#     '''
+#      - download modis products in area of interest
+#      '''
+#     gp.get_modis(product, aoi, start_date, end_date, band, export=True)
+#
+# @click.group(chain=True)
+# def commands():
+#     """
+#      Access Google Earth Engine Products by Area of Interest
+#     """
+# commands.add_command(check_features)
+# commands.add_command(check_metadata)
+# commands.add_command(download_modis)
+#
 
