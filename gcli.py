@@ -1,7 +1,8 @@
-'''
-Command line interface for geepy allows users to download products from terminal
+"""
+    Command line interface for geepy allows users to download products from terminal
+"""
 
-'''
+
 import click
 import geepy
 
@@ -9,9 +10,9 @@ import geepy
 @click.command()
 @click.argument('product')
 def check_metadata(product):
-    '''
+    """
     check an image product's meta data
-    '''
+    """
 
     geepy.get_metadata(product)
 
@@ -22,9 +23,9 @@ def check_features(shp):
     """
     check shapefile readiness for processing
     """
+
     features = geepy.get_features(shp)
     print(features)
-
 
 
 @click.command()
@@ -35,10 +36,10 @@ def check_features(shp):
 @click.argument('band')
 def download_modis(product, aoi, start_date, end_date,
               band='NDVI', export=True):
-
     """
     download modis products in area of interest
     """
+
     geepy.get_modis(product, aoi, start_date, end_date,
               band=band, export=export)
 
@@ -54,14 +55,12 @@ def download_sentinel(product, aoi,
                       start_date, end_date,
                       pcc=3, output='output',
                        export=True):
-    '''
+    """
     download sentinel imagery by area of interest
-    '''
+    """
 
     geepy.get_sentinel(product, aoi, start_date, end_date,
                               pcc, output, export=export)
-
-
 
 
 @click.command()
@@ -71,9 +70,9 @@ def download_sentinel(product, aoi,
 @click.argument('end_date')
 def download_chirps(product, aoi,start_date,
                     end_date, export=True):
-    '''
+    """
     download chrips imagery by area of interest
-    '''
+    """
 
     geepy.get_chirps(product, aoi, start_date,
                      end_date, export=export)
@@ -85,8 +84,12 @@ def download_chirps(product, aoi,start_date,
 @click.argument('start_date')
 @click.argument('end_date')
 @click.argument('band')
-def download_terraclimate_data(product, aoi, start_date, end_date,
+def download_terraclimate(product, aoi, start_date, end_date,
               band=['aet'], export=True):
+    """
+    download terraclimate data by area of interest
+    """
+
     geepy.get_terraclimate(product, aoi, start_date, end_date,
               band=band, export=export)
 
@@ -103,4 +106,4 @@ commands.add_command(check_metadata)
 commands.add_command(download_modis)
 commands.add_command(download_chirps)
 commands.add_command(download_sentinel)
-commands.add_command(download_terraclimate_data)
+commands.add_command(download_terraclimate)
