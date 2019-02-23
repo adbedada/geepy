@@ -125,11 +125,12 @@ def sentinel_cloud_mask(image):
                 .copyProperties(image, ["system:time_start"])
 
 
-def get_sentinel(product, aoi, start_date, end_date,
-                pcc=3,
-                output='output',
-                bands=['B2','B3','B4','B8'],
-                export=False):
+def get_sentinel(product, aoi,
+                 start_date, end_date,
+                 pcc=3,
+                 output='output',
+                 bands = ['B2', 'B3', 'B4', 'B8'],
+                 export=False):
     '''
     :param product: sentinel imagery product name
     :param aoi: area of interest as a shapefile
@@ -144,11 +145,12 @@ def get_sentinel(product, aoi, start_date, end_date,
 
     geometry = get_features(aoi)
     img = ee.ImageCollection(product) \
-        .filterBounds(geometry) \
-        .filterDate(start_date, end_date) \
-        .map(sentinel_cloud_mask) \
+            .filterDate(start_date, end_date) \
+            .filterBounds(geometry) \
+            .map(sentinel_cloud_mask) \
+            .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', pcc))
 
-    col = img.filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', pcc))
+    col = img.median()
 
     if export is False:
         return col
@@ -166,7 +168,26 @@ def get_sentinel(product, aoi, start_date, end_date,
         task = ee.batch.Export.image.toDrive(mosaic,
                                              region=region,
                                              description=output)
-        task.start()
+        return task
+
+
+def save_output(col, geometry, band):
+
+    length = len(col.getInfo()['features'])
+    img_list = col.toList(length)
+
+    region = ee.Feature(geometry.first()) \
+        .geometry().bounds().getInfo()['coordinates']
+
+    for i in range(length):
+        img = ee.Image(img_list.get(i)).clip(geometry)
+        timestamp = (img.getInfo()['properties']['system:index'])
+        name = (str(band[0] + "_") + timestamp)
+        task = ee.batch.Export.image.toDrive(img,
+                                             region=region,
+                                             description=name)
+
+        return task
 
 
 def get_modis(product, aoi, start_date, end_date,
@@ -199,3 +220,46 @@ def get_modis(product, aoi, start_date, end_date,
 
             task.start()
         print("submitted task for downloading your request")
+
+
+def get_chirps(product, aoi, start_date,
+               end_date, export=False):
+
+    '''
+    :param product: CHIRPS (precipitation) daily or pentad(5-days) data
+    :param aoi: area of interest
+    :param start_date: date to start from
+    :param end_date: last date to check to
+    :param export: option to export as a tif file
+    :return: collection of images or output geotiff
+    '''
+
+    band = ['precipitation']
+    geometry = get_features(aoi)
+    col = ee.ImageCollection(product) \
+            .filterBounds(geometry) \
+            .filterDate(start_date, end_date) \
+            .select(band)
+
+    if export is False:
+        return col
+
+    else:
+        length = len(col.getInfo()['features'])
+        img_list = col.toList(length)
+
+        region = ee.Feature(geometry.first()) \
+            .geometry().bounds().getInfo()['coordinates']
+
+        for i in range(length):
+            img = ee.Image(img_list.get(i)).clip(geometry)
+            timestamp = (img.getInfo()['properties']['system:index'])
+            name = (str(band[0] + "_") + timestamp)
+
+            task = ee.batch.Export.image.toDrive(img,
+                                                 region=region,
+                                                 description=name)
+
+            print("submitted "+name+" for downloading")
+
+            return task
