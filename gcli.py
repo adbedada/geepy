@@ -35,7 +35,7 @@ def check_features(shp):
 @click.argument('end_date')
 @click.argument('band')
 def download_modis(product, aoi, start_date, end_date,
-              band='NDVI', export=True):
+              band=['NDVI'], export=True):
     """
     download modis products in area of interest
     """

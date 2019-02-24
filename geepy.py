@@ -40,6 +40,8 @@ def get_features(shp):
     projection = get_epsg(shp)
     wgs84 = ee.Projection('EPSG:4326')
     features = []
+    # convert geometry to feature collection
+    # transform the shapefile's projection to WGS84
     for sr in reader.shapeRecords():
         atr = dict(zip(field_names, sr.record))
         geom = sr.shape.__geo_interface__
@@ -87,7 +89,7 @@ def get_landsat(product, aoi,
     img = ee.ImageCollection(product)\
         .filterBounds(geometry)\
         .filterDate(start_date, end_date) \
-
+        .median() # return the median band
     col = img.filter(ee.Filter.lt('ClOUD_COVER',pcc))
 
     if export is False:
@@ -191,7 +193,7 @@ def save_output(col, geometry, band):
 
 
 def get_modis(product, aoi, start_date, end_date,
-              band='NDVI', export=False):
+              band=['NDVI'], export=False):
 
     geometry = get_features(aoi)
     col = ee.ImageCollection(product) \
@@ -213,11 +215,12 @@ def get_modis(product, aoi, start_date, end_date,
         for i in range(length):
             img = ee.Image(img_list.get(i)).clip(geometry)
             timestamp = (img.getInfo()['properties']['system:index'])
-            name = (str(band[0] + "_") + timestamp)
+            name = (str(band) + "_" + timestamp)
 
             task = ee.batch.Export.image.toDrive(img,
                                                  region=region,
-                                                 description=name)
+                                                 description=name,
+                                                 maxPixels=1e13)
 
             print("submitted "+name+" for downloading")
 
@@ -260,7 +263,8 @@ def get_chirps(product, aoi, start_date,
 
             task = ee.batch.Export.image.toDrive(img,
                                                  region=region,
-                                                 description=name)
+                                                 description=name,
+                                                 maxPixels=1e15)
 
             print("submitted "+name+" for downloading")
 

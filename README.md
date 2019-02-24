@@ -4,8 +4,9 @@ Geepy is built up on Google Earth Engine's python api with a goal in mind of
 simplifying the process to access imagery for a particular area of our interest. 
 The tool allows users to leverage ESRI's shapefile to crop and interact with a product.
 
-Geepy also lets users download certain products for a time-series analysis by subsetting 
-and cropping images with respect to their temporal resolution (e.g, 16-day, pentad, 1-day...). 
+Geepy also lets users download certain products for a time-series analysis by cropping 
+and extracting image collections by the temporal resolution (e.g, 16-day, pentad, 1-day...) 
+of the product. Hence, data for each temporal span will be exported as an individual geoTIFF file.
      
  ##### Installation
 
@@ -17,7 +18,7 @@ from github:
 
 ##### Usage
 
-Get CHIRPS (rainfall) data with the option to export for downloading.
+Example: Get CHIRPS (rainfall) data for our study area `sample.shp`.
 
 ```python
 import geepy
@@ -26,17 +27,17 @@ task = geepy.get_chirps("UCSB-CHG/CHIRPS/PENTAD",
                         "../data/sample.shp", 
                         "2017-11-01", "2018-01-05", 
                          export=False)
-
 ```
      
-The above script returns an image collection and if we want, for instance, 
-count number of images/bands collected with in this time period, we can do:
+The above script returns an image collection for the time period specified and if we want to, for instance, 
+count the number of images/bands it contains, we can do:
  
 ```python
-num = len(task.getInfo()['features'])
-print(num)
+num_bands = len(task.getInfo()['features'])
+print(num_bands)
 ```
-    
+output:
+
     >>> 13
    
    Alternatively, we can download the product by saving the bands individually.
