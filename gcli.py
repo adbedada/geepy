@@ -8,7 +8,7 @@ import geepy
 
 
 @click.command()
-@click.argument('product')
+@click.option('--product', '-p', 'product')
 def check_metadata(product):
     """
     check an image product's meta data
@@ -18,7 +18,7 @@ def check_metadata(product):
 
 
 @click.command()
-@click.argument('shp')
+@click.option('--shapefile', '-shp', 'shp')
 def check_features(shp):
     """
     check shapefile readiness for processing
@@ -29,11 +29,16 @@ def check_features(shp):
 
 
 @click.command()
-@click.argument('product')
-@click.argument('aoi')
-@click.argument('start_date')
-@click.argument('end_date')
-@click.argument('band')
+# @click.argument('product')
+# @click.argument('aoi')
+# @click.argument('start_date')
+# @click.argument('end_date')
+# @click.argument('band')
+@click.option('--product', '-p', 'product')
+@click.option('--area-of-interest', '-a', 'aoi')
+@click.option('--start-date', '-sd', 'start_date')
+@click.option('--end-date', '-ed', 'end_date')
+@click.option('--band', '-b', 'band')
 def download_modis(product, aoi, start_date, end_date,
               band=['NDVI'], export=True):
     """
@@ -45,12 +50,13 @@ def download_modis(product, aoi, start_date, end_date,
 
 
 @click.command()
-@click.argument('product')
-@click.argument('aoi')
-@click.argument('start_date')
-@click.argument('end_date')
-@click.argument('pcc')
-@click.argument('output')
+@click.option('--product', '-p', 'product')
+@click.option('--area-of-interest', '-a', 'aoi')
+@click.option('--start-date', '-sd', 'start_date')
+@click.option('--end-date', '-ed', 'end_date')
+@click.option('--cloud-cover(%)', '-pcc', 'pcc')
+@click.option('--band', '-b', 'band')
+@click.argument('--output-name','-oo','output')
 def download_sentinel(product, aoi,
                       start_date, end_date,
                       pcc=3, output='output',
@@ -64,10 +70,10 @@ def download_sentinel(product, aoi,
 
 
 @click.command()
-@click.argument('product')
-@click.argument('aoi')
-@click.argument('start_date')
-@click.argument('end_date')
+@click.option('--product', '-p', 'product')
+@click.option('--area-of-interest', '-a', 'aoi')
+@click.option('--start-date', '-sd', 'start_date')
+@click.option('--end-date', '-ed', 'end_date')
 def download_chirps(product, aoi,start_date,
                     end_date, export=True):
     """
@@ -79,11 +85,16 @@ def download_chirps(product, aoi,start_date,
 
 
 @click.command()
-@click.argument('product')
-@click.argument('aoi')
-@click.argument('start_date')
-@click.argument('end_date')
-@click.argument('band')
+# @click.argument('product')
+# @click.argument('aoi')
+# @click.argument('start_date')
+# @click.argument('end_date')
+# @click.argument('band')
+@click.option('--product', '-p', 'product')
+@click.option('--area-of-interest', '-a', 'aoi')
+@click.option('--start-date', '-sd', 'start_date')
+@click.option('--end-date', '-ed', 'end_date')
+@click.option('--band', '-b', 'band')
 def download_terraclimate(product, aoi, start_date, end_date,
               band=['aet'], export=True):
     """
