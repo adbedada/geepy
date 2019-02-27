@@ -29,11 +29,6 @@ def check_features(shp):
 
 
 @click.command()
-# @click.argument('product')
-# @click.argument('aoi')
-# @click.argument('start_date')
-# @click.argument('end_date')
-# @click.argument('band')
 @click.option('--product', '-p', 'product')
 @click.option('--area-of-interest', '-a', 'aoi')
 @click.option('--start-date', '-sd', 'start_date')
@@ -56,7 +51,7 @@ def download_modis(product, aoi, start_date, end_date,
 @click.option('--end-date', '-ed', 'end_date')
 @click.option('--cloud-cover(%)', '-pcc', 'pcc')
 @click.option('--band', '-b', 'band')
-@click.argument('--output-name','-oo','output')
+@click.option('--output-name', '-oo', 'output')
 def download_sentinel(product, aoi,
                       start_date, end_date,
                       pcc=3, output='output',
@@ -74,14 +69,15 @@ def download_sentinel(product, aoi,
 @click.option('--area-of-interest', '-a', 'aoi')
 @click.option('--start-date', '-sd', 'start_date')
 @click.option('--end-date', '-ed', 'end_date')
+@click.option('--band', '-b', 'band')
 def download_chirps(product, aoi,start_date,
-                    end_date, export=True):
+                    end_date,  band=['precipitation'], export=True):
     """
     download chrips imagery by area of interest
     """
 
     geepy.get_chirps(product, aoi, start_date,
-                     end_date, export=export)
+                     end_date, band=band, export=export)
 
 
 @click.command()
