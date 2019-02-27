@@ -81,13 +81,16 @@ on the GEE's web-based IDE under the tab 'Task Manager'.
  
   To replicate the above example, we can request batch download on terminal with:
   
-    geepy download-chirps'UCSB-CHG/CHIRPS/PENTAD' 'data/sample.shp' '2017-11-01' '2018-01-05'
+    geepy download-chirps -p 'UCSB-CHG/CHIRPS/PENTAD' -a 'data/addis_abeba.shp' -sd '2017-11-01' -ed '2018-01-05'
     
   output on console: 
   
+            Total number of bands requested: 13
+
         submitted precipitation_20171101 for downloading
         submitted precipitation_20171106 for downloading
-        submitted precipitation_20171111 for downloading...
+        submitted precipitation_20171111 for downloading
+        submitted precipitation_20171116 for downloading...
         
   
   

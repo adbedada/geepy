@@ -69,15 +69,14 @@ def download_sentinel(product, aoi,
 @click.option('--area-of-interest', '-a', 'aoi')
 @click.option('--start-date', '-sd', 'start_date')
 @click.option('--end-date', '-ed', 'end_date')
-@click.option('--band', '-b', 'band')
-def download_chirps(product, aoi,start_date,
-                    end_date,  band=['precipitation'], export=True):
+def download_chirps(product, aoi, start_date,
+                    end_date, export=True):
     """
     download chrips imagery by area of interest
     """
 
     geepy.get_chirps(product, aoi, start_date,
-                     end_date, band=band, export=export)
+                     end_date, export=export)
 
 
 @click.command()
@@ -97,8 +96,8 @@ def download_terraclimate(product, aoi, start_date, end_date,
     download terraclimate data by area of interest
     """
 
-    geepy.get_terraclimate(product, aoi, start_date, end_date,
-              band=band, export=export)
+    geepy.get_terraclimate(product, aoi, start_date,
+                           end_date, band=band, export=export)
 
 
 @click.group(chain=True)
