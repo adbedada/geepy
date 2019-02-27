@@ -40,13 +40,15 @@ def get_features(shp):
     projection = get_epsg(shp)
     wgs84 = ee.Projection('EPSG:4326')
     features = []
-    # convert geometry to feature collection
-    # transform the shapefile's projection to WGS84
+
     for sr in reader.shapeRecords():
         atr = dict(zip(field_names, sr.record))
         geom = sr.shape.__geo_interface__
-        ee_geometry = ee.Geometry(geom, 'EPSG:' + projection) \
-                        .transform(wgs84, 1)
+        if projection == 4326:
+            ee_geometry = ee.Geometry(geom,'EPSG:4326')
+        else:
+            ee_geometry = ee.Geometry(geom, 'EPSG:' + projection)\
+                            .transform(wgs84, 1)
         feat = ee.Feature(ee_geometry, atr)
         features.append(feat)
 
@@ -174,22 +176,28 @@ def get_sentinel(product, aoi,
 
 
 def save_output(col, geometry, band):
-
     length = len(col.getInfo()['features'])
     img_list = col.toList(length)
+    #
+    region = ee.Feature(geometry.first())\
+                .geometry().bounds().getInfo()['coordinates']
 
-    region = ee.Feature(geometry.first()) \
-        .geometry().bounds().getInfo()['coordinates']
+    print("\n Total number of bands requested: " + str(length)+"\n")
 
     for i in range(length):
         img = ee.Image(img_list.get(i)).clip(geometry)
         timestamp = (img.getInfo()['properties']['system:index'])
-        name = (str(band[0] + "_") + timestamp)
-        task = ee.batch.Export.image.toDrive(img,
-                                             region=region,
-                                             description=name)
 
-        return task
+        name = (str(band) + "_" + timestamp)
+    #
+        task = ee.batch.Export.image.toDrive(img,
+                                            region=region,
+                                            description=name,
+                                             maxPixels=1e13)
+    #
+        print("submitted "+name+" for downloading")
+
+        task.start()
 
 
 def get_modis(product, aoi, start_date, end_date,
@@ -205,11 +213,10 @@ def get_modis(product, aoi, start_date, end_date,
         return col
 
     else:
-
         length = len(col.getInfo()['features'])
         img_list = col.toList(length)
 
-        region = ee.Feature(geometry.first())\
+        region = ee.Feature(geometry.first()) \
                     .geometry().bounds().getInfo()['coordinates']
 
         for i in range(length):
@@ -222,7 +229,7 @@ def get_modis(product, aoi, start_date, end_date,
                                                  description=name,
                                                  maxPixels=1e13)
 
-            print("submitted "+name+" for downloading")
+            print("submitted " + name + " for downloading")
 
             task.start()
 
@@ -264,7 +271,7 @@ def get_chirps(product, aoi, start_date,
             task = ee.batch.Export.image.toDrive(img,
                                                  region=region,
                                                  description=name,
-                                                 maxPixels=1e15)
+                                                 maxPixels=1e13)
 
             print("submitted "+name+" for downloading")
 
@@ -276,31 +283,12 @@ def get_terraclimate(product, aoi, start_date, end_date,
 
     geometry = get_features(aoi)
     col = ee.ImageCollection(product) \
-        .filterBounds(geometry) \
-        .filterDate(start_date, end_date) \
-        .select(band)
+            .filterBounds(geometry) \
+            .filterDate(start_date, end_date) \
+            .select(band)
 
     if export is False:
         return col
 
     else:
-
-        length = len(col.getInfo()['features'])
-        img_list = col.toList(length)
-
-        region = ee.Feature(geometry.first())\
-                    .geometry().bounds().getInfo()['coordinates']
-
-        for i in range(length):
-            img = ee.Image(img_list.get(i)).clip(geometry)
-            timestamp = (img.getInfo()['properties']['system:index'])
-
-            name = (str(band) + "_" + timestamp)
-
-            task = ee.batch.Export.image.toDrive(img,
-                                                region=region,
-                                                description=name)
-
-            print("submitted "+name+" for downloading")
-
-            task.start()
+        save_output(col, geometry, band)
