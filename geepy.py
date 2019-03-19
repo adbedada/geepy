@@ -199,7 +199,7 @@ def save_output(col, geometry, band):
 
 
 def get_modis(product, aoi, start_date, end_date,
-              band=['NDVI'], export=False):
+              band='NDVI', export=False):
 
     geometry = get_features(aoi)
     col = ee.ImageCollection(product) \
