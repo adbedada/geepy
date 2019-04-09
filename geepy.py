@@ -108,6 +108,7 @@ def get_landsat(product, aoi,
 
         # start exporting as a single tile/image
         task = ee.batch.Export.image.toDrive(mosaic,
+                                             skipEmptyTiles= True,
                                              region=region,
                                              description = output)
         task.start()
@@ -170,6 +171,7 @@ def get_sentinel(product, aoi,
 
         # start exporting as a single tile/image
         task = ee.batch.Export.image.toDrive(mosaic,
+                                             skipEmptyTiles= True,
                                              region=region,
                                              description=output)
         task.start()
@@ -190,6 +192,7 @@ def save_output(col, geometry, band):
         name = (str(band) + "_" + timestamp)
         task = ee.batch.Export.image.toDrive(img,
                                             region=region,
+                                            skipEmptyTiles= True,
                                             description=name,
                                              maxPixels=1e13)
     #
