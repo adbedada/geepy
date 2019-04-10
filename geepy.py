@@ -26,6 +26,17 @@ def get_epsg(shp):
         epsg_num = epsg[pos:]
     return epsg_num
 
+      
+def get_bbox(shp):
+    '''
+    gets bounding box of shape
+    :param shp:
+    :return: geometry object with bounding box
+    '''
+    reader = shapefile.Reader(shp).bbox
+    bb = ee.Geometry.Rectangle(reader )
+    bb = ee.Algorithms.ProjectionTransform(bb)
+    return  bb
 
 def get_features(shp):
     '''
@@ -109,7 +120,7 @@ def get_landsat(product, aoi,
         # start exporting as a single tile/image
         task = ee.batch.Export.image.toDrive(mosaic,
                                              skipEmptyTiles= True,
-                                             region=region,
+                                             region=get_bbox(aoi).getInfo()['geometry']['coordinates'],
                                              description = output)
         task.start()
 
@@ -172,12 +183,12 @@ def get_sentinel(product, aoi,
         # start exporting as a single tile/image
         task = ee.batch.Export.image.toDrive(mosaic,
                                              skipEmptyTiles= True,
-                                             region=region,
+                                             region=get_bbox(aoi).getInfo()['geometry']['coordinates'],
                                              description=output)
         task.start()
 
 
-def save_output(col, geometry, band):
+def save_output(col, geometry, aoi, band):
     length = len(col.getInfo()['features'])
     img_list = col.toList(length)
     #
@@ -191,11 +202,11 @@ def save_output(col, geometry, band):
         timestamp = (img.getInfo()['properties']['system:index'])
         name = (str(band) + "_" + timestamp)
         task = ee.batch.Export.image.toDrive(img,
-                                            region=region,
+                                            region=get_bbox(aoi).getInfo()['geometry']['coordinates'] ,
                                             skipEmptyTiles= True,
                                             description=name,
-                                             maxPixels=1e13)
-    #
+                                            maxPixels=1e13)
+  
         print("submitted "+name+" for downloading")
 
         task.start()
@@ -214,7 +225,7 @@ def get_modis(product, aoi, start_date, end_date,
         return col
 
     else:
-        save_output(col, geometry, band)
+        save_output(col, geometry, aoi, band)
 
 
 def get_chirps(product, aoi, start_date,
@@ -239,27 +250,7 @@ def get_chirps(product, aoi, start_date,
         return col
 
     else:
-        # length = len(col.getInfo()['features'])
-        # img_list = col.toList(length)
-        #
-        # region = ee.Feature(geometry.first()) \
-        #     .geometry().bounds().getInfo()['coordinates']
-        #
-        # print("\n Total number of bands requested: " + str(length) + "\n")
-        # for i in range(length):
-        #     img = ee.Image(img_list.get(i)).clip(geometry)
-        #     timestamp = (img.getInfo()['properties']['system:index'])
-        #     name = (str(band[0]) + "_" + timestamp)
-        #
-        #     task = ee.batch.Export.image.toDrive(img,
-        #                                          region=region,
-        #                                          description=name,
-        #                                          maxPixels=1e13)
-        #
-        #     print("submitted " + name + " for downloading")
-        #
-        #     task.start()
-        save_output(col, geometry, band)
+        save_output(col, geometry, aoi, band)
 
 
 def get_terraclimate(product, aoi, start_date, end_date,
@@ -275,4 +266,4 @@ def get_terraclimate(product, aoi, start_date, end_date,
         return col
 
     else:
-        save_output(col, geometry, band)
+        save_output(col, geometry, aoi, band)
