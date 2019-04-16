@@ -205,7 +205,8 @@ def save_output(col, geometry, aoi, band):
                                             region=get_bbox(aoi).getInfo()['geometry']['coordinates'] ,
                                             skipEmptyTiles= True,
                                             description=name,
-                                            maxPixels=1e13)
+                                            maxPixels=1e13,
+                                            crs='EPSG:4326')
   
         print("submitted "+name+" for downloading")
 
