@@ -203,12 +203,11 @@ def save_output(col, geometry, aoi, band):
         img = ee.Image(img_list.get(i)).clip(geometry)
         timestamp = (img.getInfo()['properties']['system:index'])
         name = (str(band) + "_" + timestamp)
-        task = ee.batch.Export.image.toDrive(img,
+        task = ee.batch.Export.image.toDrive(img.unmask(-9999),
                                             region=get_bbox(aoi).getInfo()['geometry']['coordinates'] ,
                                             skipEmptyTiles= True,
                                             description=name,
                                             defaultValue=-9999,
-                                            maxPixels=1e13)
                                             maxPixels=1e13,
                                             crs='EPSG:4326')
   
