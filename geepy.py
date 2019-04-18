@@ -118,7 +118,7 @@ def get_landsat(product, aoi,
                             .getInfo()['coordinates']
 
         # start exporting as a single tile/image
-        task = ee.batch.Export.image.toDrive(mosaic,
+        task = ee.batch.Export.image.toDrive(mosaic.unmask(-9999),
                                              skipEmptyTiles= True,
                                              defaultValue=-9999,
                                              region=get_bbox(aoi).getInfo()['geometry']['coordinates'],
@@ -182,7 +182,7 @@ def get_sentinel(product, aoi,
             .getInfo()['coordinates']
 
         # start exporting as a single tile/image
-        task = ee.batch.Export.image.toDrive(mosaic,
+        task = ee.batch.Export.image.toDrive(mosaic.unmask(-9999),
                                              skipEmptyTiles= True,
                                              defaultValue=-9999,
                                              region=get_bbox(aoi).getInfo()['geometry']['coordinates'],
