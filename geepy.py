@@ -209,6 +209,8 @@ def save_output(col, geometry, aoi, band):
                                             description=name,
                                             defaultValue=-9999,
                                             maxPixels=1e13)
+                                            maxPixels=1e13,
+                                            crs='EPSG:4326')
   
         print("submitted "+name+" for downloading")
 
