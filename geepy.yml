@@ -1,0 +1,11 @@
+name: geepy  
+channels:
+- defaults
+- conda-forge
+- ericmjl
+dependencies:
+- python=3.6
+- earthengine-api
+- fiona
+- pip
+- pip:
