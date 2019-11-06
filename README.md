@@ -16,6 +16,9 @@ from github:
     cd geepy
     pip install e .
 
+Follow instructions from [Google Earth Engine Install](https://developers.google.com/earth-engine/python_install-conda.html) 
+
+
 ##### Usage
 
 Example: Get CHIRPS (rainfall) data for our study area `sample.shp`.
