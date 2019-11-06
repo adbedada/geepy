@@ -8,4 +8,5 @@ dependencies:
 - earthengine-api
 - fiona
 - pip
+- pyshp
 - pip:
