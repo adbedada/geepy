@@ -191,11 +191,16 @@ def get_sentinel(product, aoi,
 
 
 def save_output(col, geometry, aoi, band):
-    length = len(col.getInfo()['features'])
+    
+    try:
+        length = len(col.getInfo()['features'])
+    except:
+        print('Area is too large or feature too complex, not sure, create a simple feature with 1 or more attributes')
+        raise 
     img_list = col.toList(length)
     #
-    region = ee.Feature(geometry.first())\
-                .geometry().bounds().getInfo()['coordinates']
+    #region = ee.Feature(geometry.first())\
+    #            .geometry().bounds().getInfo()['coordinates']
 
     print("\n Total number of bands requested: " + str(length)+"\n")
 
@@ -216,10 +221,12 @@ def save_output(col, geometry, aoi, band):
         task.start()
 
 
-def get_modis(product, aoi, start_date, end_date,
-              band='NDVI', export=False):
+def get_modis(aoi, start_date, end_date, 
+              product = "MODIS/006/MOD13Q1", band='NDVI', export=False,
+              ):
 
     geometry = get_features(aoi)
+    print(geometry)
     col = ee.ImageCollection(product) \
         .filterBounds(geometry) \
         .filterDate(start_date, end_date) \
