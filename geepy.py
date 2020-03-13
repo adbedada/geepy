@@ -79,10 +79,8 @@ def read_single_image(product, aoi,start_date,
     return img
 
 
-def get_landsat(product, aoi,
-                start_date, end_date,
-                pcc=5,
-                output='output',
+def get_landsat(product, aoi, start_date, end_date,
+                pcc=5, output='output',
                 bands=['B2','B3','B4'],
                 export=False):
 
@@ -121,6 +119,8 @@ def get_landsat(product, aoi,
         task = ee.batch.Export.image.toDrive(mosaic.unmask(-9999),
                                              skipEmptyTiles= True,
                                              defaultValue=-9999,
+                                             folder ='GEE_downloads',
+                                             scale=30,
                                              region=get_bbox(aoi).getInfo()['geometry']['coordinates'],
                                              description = output)
         task.start()
@@ -142,10 +142,8 @@ def sentinel_cloud_mask(image):
                 .copyProperties(image, ["system:time_start"])
 
 
-def get_sentinel(product, aoi,
-                 start_date, end_date,
-                 pcc=3,
-                 output='output',
+def get_sentinel(product, aoi, start_date, end_date,
+                 pcc=3,output='output',
                  bands = ['B2', 'B3', 'B4', 'B8'],
                  export=False):
     '''
@@ -185,12 +183,14 @@ def get_sentinel(product, aoi,
         task = ee.batch.Export.image.toDrive(mosaic.unmask(-9999),
                                              skipEmptyTiles= True,
                                              defaultValue=-9999,
+                                             folder ='GEE_downloads',
+                                             scale=30,
                                              region=get_bbox(aoi).getInfo()['geometry']['coordinates'],
                                              description=output)
         task.start()
 
 
-def save_output(col, geometry, aoi, band):
+def save_output(col, geometry, aoi, band, scale):
     
     try:
         length = len(col.getInfo()['features'])
@@ -212,7 +212,9 @@ def save_output(col, geometry, aoi, band):
                                             region=get_bbox(aoi).getInfo()['geometry']['coordinates'] ,
                                             skipEmptyTiles= True,
                                             description=name,
-                                            defaultValue=-9999,
+                                            scale = scale, 
+                                            folder ='GEE_downloads',
+                                            #defaultValue=-9999,
                                             maxPixels=1e13,
                                             crs='EPSG:4326')
   
@@ -222,8 +224,8 @@ def save_output(col, geometry, aoi, band):
 
 
 def get_modis(aoi, start_date, end_date, 
-              product = "MODIS/006/MOD13Q1", band='NDVI', export=False,
-              ):
+              product = "MODIS/006/MOD13Q1", 
+              band='NDVI', export=False, scale = 250):
 
     geometry = get_features(aoi)
     print(geometry)
@@ -236,11 +238,12 @@ def get_modis(aoi, start_date, end_date,
         return col
 
     else:
-        save_output(col, geometry, aoi, band)
+        save_output(col, geometry, aoi, band, scale = 250)
 
 
-def get_chirps(product, aoi, start_date,
-               end_date, export=False):
+def get_chirps(aoi, start_date, end_date, 
+               product= 'UCSB-CHG/CHIRPS/PENTAD', 
+               export=False, scale = 250):
 
     '''
     :param product: CHIRPS (precipitation) daily or pentad(5-days) data
@@ -261,12 +264,59 @@ def get_chirps(product, aoi, start_date,
         return col
 
     else:
-        save_output(col, geometry, aoi, band)
+        save_output(col, geometry, aoi, band, scale = scale)
 
 
-def get_terraclimate(product, aoi, start_date, end_date,
-              band=['aet'], export=False):
+def get_terraclimate(aoi, start_date, end_date,
+                     product='IDAHO_EPSCOR/TERRACLIMATE',
+                     band='aet', export=False):
 
+    print(
+        '''
+        Name	Units	Min	Max	Scale	Description
+        aet	mm	0*	3140*	0.1	
+        Actual evapotranspiration, derived using a one-dimensional soil water balance model
+        
+        def	mm	0*	4548*	0.1	
+        Climate water deficit, derived using a one-dimensional soil water balance model
+        
+        pdsi		-4317*	3418*	0.01	
+        Palmer Drought Severity Index
+        
+        pet	mm	0*	4548*	0.1	
+        Reference evapotranspiration (ASCE Penman-Montieth)
+        
+        pr	mm	0*	7245*		
+        Precipitation accumulation
+        
+        ro	mm	0*	12560*		
+        Runoff, derived using a one-dimensional soil water balance model
+        
+        soil	mm	0*	8882*	0.1	
+        Soil moisture, derived using a one-dimensional soil water balance model
+        
+        srad	W/m^2	0*	5477*	0.1	
+        Downward surface shortwave radiation
+        
+        swe	mm	0*	32767*		
+        Snow water equivalent, derived using a one-dimensional soil water balance model
+        
+        tmmn	°C	-770*	387*	0.1	
+        Minimum temperature
+        
+        tmmx	°C	-670*	576*	0.1	
+        Maximum temperature
+        
+        vap	kPa	0*	14749*	0.001	
+        Vapor pressure
+        
+        vpd	kPa	0*	1113*	0.01	
+        Vapor pressure deficit
+        
+        vs	m/s	0*	2923*	0.01	
+        Wind-speed at 10m
+        '''
+        )
     geometry = get_features(aoi)
     col = ee.ImageCollection(product) \
             .filterBounds(geometry) \
@@ -277,4 +327,4 @@ def get_terraclimate(product, aoi, start_date, end_date,
         return col
 
     else:
-        save_output(col, geometry, aoi, band)
+        save_output(col, geometry, aoi, band,scale = 4500 )
