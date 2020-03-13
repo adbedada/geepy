@@ -2,6 +2,7 @@ from setuptools import setup
 
 REQUIRED = [
     'click>=7.0',
+    'pyshp>=2.0.0'
 ]
 setup(
     name='geepy',
