@@ -1,6 +1,7 @@
 import ee
 import shapefile
 import fiona
+import os
 
 ee.Initialize()
 
@@ -207,7 +208,7 @@ def save_output(col, geometry, aoi, band, scale):
     for i in range(length):
         img = ee.Image(img_list.get(i)).clip(geometry)
         timestamp = (img.getInfo()['properties']['system:index'])
-        name = (str(band) + "_" + timestamp)
+        name = (str(band) + "_" + timestamp+'_'+str(scale)+'m')
         task = ee.batch.Export.image.toDrive(img.unmask(-9999),
                                             region=get_bbox(aoi).getInfo()['geometry']['coordinates'] ,
                                             skipEmptyTiles= True,
@@ -242,7 +243,8 @@ def get_modis(aoi, start_date, end_date,
 
 
 def get_chirps(aoi, start_date, end_date, 
-               product= 'UCSB-CHG/CHIRPS/PENTAD', 
+               product= 'UCSB-CHG/CHIRPS/PENTAD',  
+               band = 'precipitation',
                export=False, scale = 250):
 
     '''
@@ -253,7 +255,7 @@ def get_chirps(aoi, start_date, end_date,
     :param export: option to export as a tif file
     :return: collection of images or output geotiff
     '''
-    band = 'precipitation'
+   
     geometry = get_features(aoi)
     col = ee.ImageCollection(product) \
             .filterBounds(geometry) \
@@ -328,3 +330,56 @@ def get_terraclimate(aoi, start_date, end_date,
 
     else:
         save_output(col, geometry, aoi, band,scale = 4500 )
+
+
+
+def get_image(aoi, product, band,
+               export=False, scale = 250):
+ 
+    geometry = get_features(aoi)
+    col = ee.Image(product) \
+            .clip(geometry) \
+            .select(band)
+
+    if export is False:
+        return col
+
+    else:
+        # start exporting as a single tile/image
+        task = ee.batch.Export.image.toDrive(col.unmask(-9999),
+                                        skipEmptyTiles= True,
+                                        folder ='GEE_downloads',
+                                        scale=scale,
+                                        region=get_bbox(aoi).getInfo()['geometry']['coordinates'],
+                                        description   = (os.path.basename(product)+'_'+str(band)+'_'+str(scale)+'m') ) )
+        task.start()
+
+ 
+
+def get_collection(aoi, start_date, end_date, 
+               product, band, scale,
+               export=False ):
+
+    '''
+    :param product: path to collection
+    :param aoi: area of interest
+    :param start_date: date to start from
+    :param end_date: last date to check to
+    :param export: option to export as a tif file
+    :return: collection of images or output geotiff
+    '''
+
+    geometry = get_features(aoi)
+    col = ee.ImageCollection(product) \
+            .filterBounds(geometry) \
+            .filterDate(start_date, end_date) \
+            .select(band)
+
+    if export is False:
+        return col
+
+    else:
+        save_output(col, geometry, aoi, band, scale)
+
+
+
