@@ -351,7 +351,7 @@ def get_image(aoi, product, band,
                                         folder ='GEE_downloads',
                                         scale=scale,
                                         region=get_bbox(aoi).getInfo()['geometry']['coordinates'],
-                                        description   = (os.path.basename(product)+'_'+str(band)+'_'+str(scale)+'m') ) )
+                                        description   = (os.path.basename(product)+'_'+str(band)+'_'+str(scale)+'m') ) 
         task.start()
 
  
