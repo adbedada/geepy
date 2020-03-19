@@ -350,6 +350,7 @@ def get_image(aoi, product, band,
                                         skipEmptyTiles= True,
                                         folder ='GEE_downloads',
                                         scale=scale,
+                                        maxPixels=1e13,
                                         region=get_bbox(aoi).getInfo()['geometry']['coordinates'],
                                         description   = (os.path.basename(product)+'_'+str(band)+'_'+str(scale)+'m') ) 
         task.start()
