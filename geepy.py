@@ -146,6 +146,7 @@ def sentinel_cloud_mask(image):
 def get_sentinel(product, aoi, start_date, end_date,
                  pcc=3,output='output',
                  bands = ['B2', 'B3', 'B4', 'B8'],
+                 scale=10,
                  export=False):
     '''
     :param product: sentinel imagery product name
@@ -155,6 +156,7 @@ def get_sentinel(product, aoi, start_date, end_date,
     :param pcc: percent_of_cloud_cover
     :param output: name of output file
     :param bands: bands to select (defaulted to bands with 10 meter resolution)
+    :param scale: spatial resolution, default 10 
     :param export: option to export image
     :return: tiff file exported to gdrive or meta data if exporting is false
     '''
@@ -185,7 +187,7 @@ def get_sentinel(product, aoi, start_date, end_date,
                                              skipEmptyTiles= True,
                                              defaultValue=-9999,
                                              folder ='GEE_downloads',
-                                             scale=30,
+                                             scale=scale,
                                              region=get_bbox(aoi).getInfo()['geometry']['coordinates'],
                                              description=output)
         task.start()
